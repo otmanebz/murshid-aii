@@ -1,0 +1,891 @@
+<!-- 
+  ╔══════════════════════════════════════════════════════════╗
+  ║           MURSHID AI — index.html                       ║
+  ║   انسخ هذا الكود كاملاً والصقه في ملف index.html       ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Murshid AI – مرشدك السياحي الذكي</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700;900&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --green: #1B4D3E;
+  --green-light: #2a6b56;
+  --gold: #C9A84C;
+  --gold-light: #E8C96A;
+  --terracotta: #B5623A;
+  --cream: #F9F3E8;
+  --cream-dark: #EDE3CC;
+  --sand: #D4C5A4;
+  --text-dark: #1a1208;
+  --text-mid: #4a3820;
+  --white: #FDFAF4;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Tajawal', 'Amiri', serif;
+  background: var(--cream);
+  color: var(--text-dark);
+  min-height: 100vh;
+  direction: rtl;
+}
+body.ltr { direction: ltr; font-family: 'Tajawal', sans-serif; }
+.zellige-bg {
+  position: fixed; inset: 0; z-index: -1; opacity: 0.05;
+  background-image:
+    repeating-linear-gradient(45deg, var(--green) 0, var(--green) 1px, transparent 0, transparent 50%),
+    repeating-linear-gradient(-45deg, var(--gold) 0, var(--gold) 1px, transparent 0, transparent 50%);
+  background-size: 30px 30px;
+}
+.zellige-overlay {
+  position: fixed; inset: 0; z-index: -1; opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpolygon points='40,5 52,28 78,28 57,45 65,72 40,56 15,72 23,45 2,28 28,28' fill='%231B4D3E'/%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+header {
+  background: var(--green);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  border-bottom: 3px solid var(--gold);
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1200px; margin: 0 auto; padding: 14px 24px;
+}
+.logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.logo-icon {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 4px 12px rgba(201,168,76,0.4);
+}
+.logo-text h1 { font-family: 'Cinzel', serif; font-size: 22px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; }
+.logo-text span { font-size: 11px; color: rgba(255,255,255,0.7); display: block; letter-spacing: 1px; }
+.lang-switcher { display: flex; gap: 6px; align-items: center; }
+.lang-btn {
+  padding: 6px 14px;
+  border: 2px solid rgba(201,168,76,0.4);
+  background: transparent;
+  color: rgba(255,255,255,0.8);
+  border-radius: 30px;
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  transition: all 0.3s;
+  font-family: 'Tajawal', sans-serif;
+}
+.lang-btn:hover, .lang-btn.active { background: var(--gold); color: var(--green); border-color: var(--gold); }
+.page { display: none; }
+.page.active { display: block; }
+.hero {
+  background: linear-gradient(160deg, var(--green) 0%, #0d2e24 50%, #1a3d31 100%);
+  padding: 80px 24px 60px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='60' cy='60' r='55' fill='none' stroke='%23C9A84C' stroke-width='0.5' opacity='0.15'/%3E%3Cpolygon points='60,10 75,40 108,40 82,58 92,90 60,72 28,90 38,58 12,40 45,40' fill='none' stroke='%23C9A84C' stroke-width='0.5' opacity='0.1'/%3E%3C/svg%3E");
+  background-size: 120px; opacity: 0.3;
+}
+.hero-content { position: relative; z-index: 1; max-width: 750px; margin: 0 auto; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(201,168,76,0.15);
+  border: 1px solid rgba(201,168,76,0.4);
+  padding: 6px 20px; border-radius: 40px;
+  color: var(--gold-light); font-size: 13px;
+  margin-bottom: 24px; backdrop-filter: blur(10px);
+}
+.hero h2 { font-family: 'Amiri', serif; font-size: clamp(32px, 5vw, 56px); color: white; line-height: 1.2; margin-bottom: 16px; }
+.hero h2 span { color: var(--gold-light); }
+.hero p { color: rgba(255,255,255,0.75); font-size: 17px; line-height: 1.8; max-width: 560px; margin: 0 auto 32px; }
+.zellige-border {
+  height: 6px;
+  background: linear-gradient(90deg, var(--terracotta), var(--gold), var(--green), var(--gold), var(--terracotta));
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+@keyframes shimmer { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+.form-section { max-width: 1000px; margin: 0 auto; padding: 48px 24px 80px; }
+.form-card {
+  background: var(--white); border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(27,77,62,0.1), 0 4px 16px rgba(0,0,0,0.05);
+  overflow: hidden; border: 1px solid rgba(201,168,76,0.2);
+}
+.form-header {
+  background: linear-gradient(135deg, var(--green) 0%, #2a6b56 100%);
+  padding: 28px 36px; display: flex; align-items: center; gap: 16px;
+  border-bottom: 2px solid var(--gold);
+}
+.form-header-icon {
+  width: 56px; height: 56px; background: rgba(201,168,76,0.2);
+  border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; border: 1px solid rgba(201,168,76,0.3);
+}
+.form-header-text h3 { font-family: 'Cinzel', serif; font-size: 20px; color: var(--gold-light); }
+.form-header-text p { color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 4px; }
+.form-body { padding: 40px 36px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+@media(max-width: 680px) { .form-grid { grid-template-columns: 1fr; } .form-body { padding: 24px 20px; } }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-weight: 700; font-size: 14px; color: var(--text-mid); display: flex; align-items: center; gap: 8px; }
+.form-label .label-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--gold-light); flex-shrink: 0;
+}
+.form-control {
+  padding: 13px 18px; border: 2px solid var(--cream-dark);
+  border-radius: 14px; font-size: 15px; font-family: 'Tajawal', sans-serif;
+  background: var(--cream); color: var(--text-dark); transition: all 0.3s;
+  appearance: none; -webkit-appearance: none; direction: rtl;
+}
+body.ltr .form-control { direction: ltr; }
+.form-control:focus { outline: none; border-color: var(--green); background: white; box-shadow: 0 0 0 4px rgba(27,77,62,0.08); }
+select.form-control {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231B4D3E' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: left 14px center; padding-left: 40px;
+}
+body.ltr select.form-control { background-position: right 14px center; padding-left: 18px; padding-right: 40px; }
+.budget-row { display: flex; gap: 10px; }
+.budget-row input { flex: 1; }
+.budget-row select { width: 130px; flex-shrink: 0; }
+.check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 4px; }
+.check-item {
+  display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+  background: var(--cream); border: 2px solid var(--cream-dark); border-radius: 12px;
+  cursor: pointer; transition: all 0.25s; font-size: 14px; user-select: none;
+}
+.check-item:hover { border-color: var(--green); background: rgba(27,77,62,0.05); }
+.check-item.checked { background: var(--green); border-color: var(--green); color: white; }
+.check-item input { display: none; }
+.date-row { display: flex; gap: 10px; align-items: center; }
+.date-row input { flex: 1; }
+.date-sep { color: var(--text-mid); font-weight: 700; flex-shrink: 0; }
+.submit-btn {
+  width: 100%; padding: 18px 40px; margin-top: 36px;
+  background: linear-gradient(135deg, var(--green) 0%, #2a6b56 100%);
+  color: white; border: none; border-radius: 16px;
+  font-family: 'Tajawal', serif; font-size: 20px; font-weight: 700;
+  cursor: pointer; transition: all 0.35s;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  box-shadow: 0 8px 24px rgba(27,77,62,0.35); position: relative; overflow: hidden;
+}
+.submit-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--gold) 0%, var(--terracotta) 100%); opacity: 0; transition: opacity 0.35s; }
+.submit-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(27,77,62,0.45); }
+.submit-btn:hover::before { opacity: 1; }
+.submit-btn span { position: relative; z-index: 1; }
+.submit-btn .btn-arrow { font-size: 24px; position: relative; z-index: 1; }
+#page-result { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+.result-header {
+  background: linear-gradient(135deg, var(--green) 0%, #0d2e24 100%);
+  border-radius: 24px; padding: 32px 36px; margin-bottom: 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px; border: 1px solid rgba(201,168,76,0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+.result-info h2 { font-family: 'Cinzel', serif; font-size: 26px; color: var(--gold-light); }
+.result-info p { color: rgba(255,255,255,0.7); margin-top: 6px; font-size: 14px; }
+.result-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.result-tag { padding: 5px 14px; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3); border-radius: 30px; font-size: 13px; color: var(--gold-light); }
+.back-btn { padding: 10px 22px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: white; border-radius: 12px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 14px; transition: all 0.3s; }
+.back-btn:hover { background: rgba(255,255,255,0.2); }
+.ai-card { background: var(--white); border-radius: 24px; border: 1px solid rgba(201,168,76,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+.ai-card-header { background: linear-gradient(135deg, var(--green) 0%, #0d2e24 100%); padding: 22px 32px; display: flex; align-items: center; gap: 16px; border-bottom: 3px solid var(--gold); }
+.ai-card-header-icon { width: 52px; height: 52px; background: rgba(201,168,76,0.2); border-radius: 14px; border: 1px solid rgba(201,168,76,0.4); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.ai-card-header-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--gold-light); display: block; }
+.ai-card-header-sub { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 4px; letter-spacing: 0.5px; }
+.ai-body { padding: 0; font-size: 16px; line-height: 2; color: var(--text-dark); }
+.ai-body-inner { padding: 40px 44px; }
+.ai-day-card { background: linear-gradient(135deg, rgba(27,77,62,0.04) 0%, rgba(201,168,76,0.04) 100%); border: 1px solid rgba(201,168,76,0.18); border-radius: 20px; margin-bottom: 28px; overflow: hidden; }
+.ai-day-header { background: linear-gradient(135deg, var(--green), var(--green-light)); padding: 16px 24px; display: flex; align-items: center; gap: 14px; }
+.ai-day-number { width: 42px; height: 42px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 18px; font-weight: 900; color: var(--green); flex-shrink: 0; }
+.ai-day-title { font-family: 'Amiri', serif; font-size: 20px; color: var(--gold-light); }
+.ai-day-body { padding: 24px 28px; }
+.ai-greeting { background: linear-gradient(135deg, var(--cream) 0%, rgba(201,168,76,0.08) 100%); border-bottom: 2px solid rgba(201,168,76,0.2); padding: 32px 44px; position: relative; }
+.ai-greeting::after { content: '✦ ✦ ✦'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); color: var(--gold); font-size: 14px; background: var(--white); padding: 0 14px; letter-spacing: 8px; }
+.ai-tips-section { background: rgba(181,98,58,0.06); border: 1px solid rgba(181,98,58,0.2); border-radius: 16px; padding: 22px 26px; margin-top: 22px; }
+.ai-tips-title { font-family: 'Amiri', serif; font-size: 18px; color: var(--terracotta); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.ai-tips-list li { margin-bottom: 8px; font-size: 14px; color: var(--text-mid); padding-right: 8px; line-height: 1.8; }
+.ai-budget-section { background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%); border-radius: 16px; padding: 24px 28px; margin-top: 24px; color: white; }
+.ai-budget-title { font-family: 'Amiri', serif; font-size: 20px; color: var(--gold-light); margin-bottom: 14px; }
+.ai-disclaimer { padding: 16px 28px; background: rgba(0,0,0,0.02); border-top: 1px solid rgba(0,0,0,0.06); font-size: 12px; color: #999; text-align: center; }
+.loading-state { padding: 80px 36px; text-align: center; }
+.loader-ring { width: 64px; height: 64px; border: 5px solid var(--cream-dark); border-top: 5px solid var(--green); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { color: var(--text-mid); font-size: 16px; }
+.loading-dots span { animation: blink 1.4s infinite both; font-size: 24px; color: var(--gold); }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+/* SUGGESTED PLACES */
+.places-card { background: var(--white); border-radius: 24px; border: 1px solid rgba(201,168,76,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+.places-card-header { background: linear-gradient(135deg, #C9A84C 0%, #a8832e 100%); padding: 20px 28px; display: flex; align-items: center; gap: 16px; border-bottom: 2px solid rgba(255,255,255,0.2); }
+.places-header-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+.places-header-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: var(--green); }
+.places-header-sub { font-size: 12px; color: rgba(27,77,62,0.7); margin-top: 3px; }
+.places-grid { padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.place-card { background: var(--cream); border: 2px solid var(--cream-dark); border-radius: 18px; padding: 18px 20px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 14px; position: relative; overflow: hidden; }
+.place-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--green), var(--green-light)); opacity: 0; transition: opacity 0.3s; }
+.place-card:hover { border-color: var(--green); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(27,77,62,0.2); }
+.place-card:hover::before { opacity: 1; }
+.place-card:hover .place-card-name, .place-card:hover .place-card-type { color: white; }
+.place-card:hover .place-card-icon-wrap { background: rgba(201,168,76,0.3); }
+.place-card-icon-wrap { width: 52px; height: 52px; background: rgba(27,77,62,0.08); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; position: relative; z-index: 1; transition: background 0.3s; }
+.place-card-text { position: relative; z-index: 1; flex: 1; }
+.place-card-name { font-family: 'Amiri', serif; font-size: 17px; font-weight: 700; color: var(--text-dark); transition: color 0.3s; line-height: 1.3; }
+.place-card-type { font-size: 12px; color: var(--text-mid); margin-top: 4px; transition: color 0.3s; }
+.place-card-arrow { font-size: 18px; color: var(--gold); position: relative; z-index: 1; transition: transform 0.3s; }
+.place-card:hover .place-card-arrow { transform: translateX(-4px); color: var(--gold-light); }
+body.ltr .place-card:hover .place-card-arrow { transform: translateX(4px); }
+/* MAP */
+#map-container { background: var(--white); border-radius: 24px; overflow: hidden; border: 1px solid rgba(201,168,76,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.07); margin-bottom: 28px; }
+.map-header { padding: 18px 28px; background: var(--green); display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--gold); }
+.map-header span { color: var(--gold-light); font-weight: 700; font-size: 15px; }
+#trip-map { height: 450px; }
+/* CHAT */
+.chat-section { background: var(--white); border-radius: 24px; border: 1px solid rgba(201,168,76,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 28px; }
+.chat-header { padding: 18px 28px; background: linear-gradient(135deg, var(--green), var(--green-light)); display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--gold); }
+.chat-header span { color: var(--gold-light); font-weight: 700; font-size: 15px; }
+.chat-messages { padding: 24px; min-height: 160px; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+.msg { display: flex; gap: 12px; align-items: flex-start; }
+.msg.user { flex-direction: row-reverse; }
+.msg-avatar { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.msg.ai .msg-avatar { background: var(--green); color: var(--gold-light); }
+.msg.user .msg-avatar { background: var(--gold); color: var(--green); }
+.msg-bubble { padding: 12px 18px; border-radius: 18px; max-width: 75%; font-size: 15px; line-height: 1.7; }
+.msg.ai .msg-bubble { background: var(--cream); border: 1px solid var(--cream-dark); border-radius: 18px 18px 18px 4px; }
+.msg.user .msg-bubble { background: var(--green); color: white; border-radius: 18px 18px 4px 18px; }
+.chat-input-row { padding: 16px 24px; background: var(--cream); border-top: 1px solid var(--cream-dark); display: flex; gap: 10px; }
+.chat-input { flex: 1; padding: 12px 18px; border: 2px solid var(--cream-dark); border-radius: 14px; font-family: 'Tajawal', sans-serif; font-size: 15px; background: white; direction: inherit; }
+.chat-input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(27,77,62,0.1); }
+.chat-send-btn { padding: 12px 24px; background: var(--green); color: var(--gold-light); border: none; border-radius: 14px; cursor: pointer; font-size: 18px; transition: all 0.3s; }
+.chat-send-btn:hover { background: var(--green-light); transform: scale(1.05); }
+/* FEEDBACK */
+.feedback-section { background: linear-gradient(135deg, var(--cream) 0%, var(--white) 100%); border-radius: 24px; border: 1px solid rgba(201,168,76,0.25); padding: 40px 36px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+.feedback-section h3 { font-family: 'Amiri', serif; font-size: 26px; color: var(--green); margin-bottom: 8px; }
+.feedback-section p { color: var(--text-mid); margin-bottom: 28px; font-size: 15px; }
+.stars-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 24px; }
+.star-btn { font-size: 36px; cursor: pointer; transition: all 0.25s; background: none; border: none; }
+.star-btn:hover, .star-btn.lit { transform: scale(1.2); filter: drop-shadow(0 0 6px var(--gold)); }
+.recommend-row { display: flex; justify-content: center; gap: 16px; margin-bottom: 24px; }
+.rec-btn { padding: 12px 32px; border-radius: 14px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 15px; font-weight: 700; transition: all 0.3s; border: 2px solid; }
+.rec-btn.yes { border-color: var(--green); color: var(--green); background: transparent; }
+.rec-btn.yes:hover, .rec-btn.yes.selected { background: var(--green); color: white; }
+.rec-btn.no { border-color: var(--terracotta); color: var(--terracotta); background: transparent; }
+.rec-btn.no:hover, .rec-btn.no.selected { background: var(--terracotta); color: white; }
+.feedback-textarea { width: 100%; max-width: 600px; padding: 14px 18px; border: 2px solid var(--cream-dark); border-radius: 14px; font-family: 'Tajawal', sans-serif; font-size: 15px; resize: vertical; min-height: 100px; direction: inherit; }
+.feedback-textarea:focus { outline: none; border-color: var(--green); }
+.feedback-submit { margin-top: 16px; padding: 13px 40px; background: var(--green); color: white; border: none; border-radius: 14px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 16px; font-weight: 700; transition: all 0.3s; }
+.feedback-submit:hover { background: var(--green-light); transform: translateY(-2px); }
+/* PLACE DETAIL PAGE */
+#page-place-detail { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+.place-detail-header { background: linear-gradient(135deg, var(--green) 0%, #0d2e24 100%); border-radius: 24px; padding: 32px 36px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border: 1px solid rgba(201,168,76,0.25); box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+.place-detail-title-wrap { display: flex; align-items: center; gap: 20px; }
+.place-detail-big-icon { width: 68px; height: 68px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 34px; flex-shrink: 0; box-shadow: 0 6px 20px rgba(201,168,76,0.4); }
+.place-detail-name { font-family: 'Cinzel', serif; font-size: 28px; color: var(--gold-light); }
+.place-detail-subtitle { color: rgba(255,255,255,0.65); font-size: 14px; margin-top: 6px; }
+.place-detail-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.place-detail-tag { padding: 4px 14px; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3); border-radius: 30px; font-size: 12px; color: var(--gold-light); }
+.back-btn-detail { padding: 10px 22px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); color: white; border-radius: 12px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-size: 14px; transition: all 0.3s; white-space: nowrap; }
+.back-btn-detail:hover { background: rgba(255,255,255,0.2); }
+.place-info-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px; }
+@media(max-width: 768px) { .place-info-grid { grid-template-columns: 1fr; } }
+.place-detail-card { background: var(--white); border-radius: 24px; border: 1px solid rgba(201,168,76,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.07); overflow: hidden; margin-bottom: 24px; }
+.place-detail-card-header { padding: 18px 26px; background: linear-gradient(135deg, var(--green), var(--green-light)); display: flex; align-items: center; gap: 12px; border-bottom: 2px solid var(--gold); }
+.place-detail-card-header .card-icon { font-size: 22px; }
+.place-detail-card-header .card-title { font-family: 'Cinzel', serif; font-size: 15px; color: var(--gold-light); font-weight: 700; }
+.place-detail-card-body { padding: 28px; font-size: 15px; line-height: 2; color: var(--text-dark); }
+.place-detail-card-body p { margin-bottom: 14px; }
+.place-detail-card-body p:last-child { margin-bottom: 0; }
+.info-list { list-style: none; }
+.info-list li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px dashed rgba(201,168,76,0.2); font-size: 14px; align-items: flex-start; }
+.info-list li:last-child { border-bottom: none; }
+.info-list .info-label { font-weight: 700; color: var(--green); min-width: 90px; flex-shrink: 0; }
+.info-list .info-val { color: var(--text-mid); }
+#detail-map { height: 380px; }
+.detail-loading { padding: 60px; text-align: center; }
+footer { background: var(--green); border-top: 3px solid var(--gold); padding: 28px 24px; text-align: center; }
+footer p { color: rgba(255,255,255,0.6); font-size: 13px; }
+footer span { color: var(--gold-light); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--green); color: white; padding: 14px 28px; border-radius: 14px; font-size: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); z-index: 9999; display: none; animation: slideUp 0.3s ease; border: 1px solid var(--gold); }
+@keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@media(max-width: 768px) { .header-inner { padding: 10px 16px; } .hero { padding: 50px 16px 40px; } .result-header { padding: 20px; } .ai-body-inner { padding: 20px; } .ai-greeting { padding: 24px 20px; } .form-header { padding: 20px; } .feedback-section { padding: 28px 20px; } .map-header { padding: 14px 20px; } .place-detail-header { padding: 20px; } }
+</style>
+</head>
+<body>
+<div class="zellige-bg"></div>
+<div class="zellige-overlay"></div>
+
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo" onclick="showPage('home')">
+      <div class="logo-icon">🕌</div>
+      <div class="logo-text">
+        <h1>MURSHID AI</h1>
+        <span data-i18n="tagline">مرشدك السياحي الذكي</span>
+      </div>
+    </a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('ar')">AR</button>
+      <button class="lang-btn" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+</header>
+<div class="zellige-border"></div>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">✨ <span data-i18n="hero_badge">مدعوم بالذكاء الاصطناعي</span></div>
+      <h2><span data-i18n="hero_title1">اكتشف المغرب</span><br><span data-i18n="hero_title2">بطريقة لا تُنسى</span></h2>
+      <p data-i18n="hero_desc">خطط سفر مخصصة، إرشادات في الوقت الفعلي، وتجارب أصيلة</p>
+    </div>
+  </div>
+  <div class="form-section">
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-header-icon">🧭</div>
+        <div class="form-header-text">
+          <h3 data-i18n="form_title">ابنِ خطة رحلتك</h3>
+          <p data-i18n="form_sub">أجب على الأسئلة وسيبني المرشد خطتك المثالية</p>
+        </div>
+      </div>
+      <div class="form-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label"><span class="label-icon">🏙️</span><span data-i18n="lbl_city">المدينة المغربية</span></label>
+            <select id="city" class="form-control">
+              <option value="">— اختر مدينة —</option>
+              <option value="marrakech">مراكش – Marrakech</option>
+              <option value="fes">فاس – Fès</option>
+              <option value="casablanca">الدار البيضاء – Casablanca</option>
+              <option value="chefchaouen">شفشاون – Chefchaouen</option>
+              <option value="rabat">الرباط – Rabat</option>
+              <option value="tanger">طنجة – Tanger</option>
+              <option value="agadir">أكادير – Agadir</option>
+              <option value="essaouira">الصويرة – Essaouira</option>
+              <option value="merzouga">مرزوقة – Merzouga</option>
+              <option value="tetouan">تطوان – Tétouan</option>
+              <option value="ifrane">إفران – Ifrane</option>
+              <option value="ouarzazate">ورزازات – Ouarzazate</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="label-icon">🌍</span><span data-i18n="lbl_country">بلدك / جنسيتك</span></label>
+            <select id="country" class="form-control">
+              <option value="">— اختر بلدك —</option>
+              <optgroup label="العالم العربي">
+                <option value="ma" data-lang="ar">المغرب 🇲🇦</option>
+                <option value="sa" data-lang="ar">السعودية 🇸🇦</option>
+                <option value="ae" data-lang="ar">الإمارات 🇦🇪</option>
+                <option value="eg" data-lang="ar">مصر 🇪🇬</option>
+                <option value="dz" data-lang="ar">الجزائر 🇩🇿</option>
+                <option value="tn" data-lang="ar">تونس 🇹🇳</option>
+                <option value="jo" data-lang="ar">الأردن 🇯🇴</option>
+                <option value="kw" data-lang="ar">الكويت 🇰🇼</option>
+                <option value="qa" data-lang="ar">قطر 🇶🇦</option>
+              </optgroup>
+              <optgroup label="Europe">
+                <option value="fr" data-lang="fr">France 🇫🇷</option>
+                <option value="es" data-lang="es">España 🇪🇸</option>
+                <option value="gb" data-lang="en">United Kingdom 🇬🇧</option>
+                <option value="de" data-lang="fr">Deutschland 🇩🇪</option>
+                <option value="it" data-lang="fr">Italia 🇮🇹</option>
+                <option value="be" data-lang="fr">Belgique 🇧🇪</option>
+                <option value="nl" data-lang="en">Netherlands 🇳🇱</option>
+                <option value="pt" data-lang="es">Portugal 🇵🇹</option>
+              </optgroup>
+              <optgroup label="Americas">
+                <option value="us" data-lang="en">United States 🇺🇸</option>
+                <option value="ca" data-lang="en">Canada 🇨🇦</option>
+                <option value="mx" data-lang="es">México 🇲🇽</option>
+                <option value="br" data-lang="es">Brasil 🇧🇷</option>
+              </optgroup>
+              <optgroup label="Asia & Other">
+                <option value="cn" data-lang="en">China 🇨🇳</option>
+                <option value="jp" data-lang="en">Japan 🇯🇵</option>
+                <option value="in" data-lang="en">India 🇮🇳</option>
+                <option value="tr" data-lang="ar">Türkiye 🇹🇷</option>
+                <option value="other" data-lang="en">Other / أخرى</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="label-icon">💰</span><span data-i18n="lbl_budget">الميزانية</span></label>
+            <div class="budget-row">
+              <input type="number" id="budget" class="form-control" placeholder="5000" min="0">
+              <select id="currency" class="form-control">
+                <option value="MAD">درهم MAD</option>
+                <option value="USD">دولار USD</option>
+                <option value="EUR">يورو EUR</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span class="label-icon">👥</span><span data-i18n="lbl_people">عدد المسافرين</span></label>
+            <select id="people" class="form-control">
+              <option value="1">1 (مسافر منفرد)</option>
+              <option value="2">2 (زوجان)</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6-10">6-10 (مجموعة)</option>
+              <option value="+10">+10 (مجموعة كبيرة)</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label"><span class="label-icon">📅</span><span data-i18n="lbl_dates">مدة الرحلة</span></label>
+            <div class="date-row">
+              <input type="date" id="date-from" class="form-control">
+              <span class="date-sep">←</span>
+              <input type="date" id="date-to" class="form-control">
+            </div>
+          </div>
+          <div class="form-group full">
+            <label class="form-label"><span class="label-icon">🎯</span><span data-i18n="lbl_interests">ماذا تريد أن تحجز / تجرب؟</span></label>
+            <div class="check-grid" id="interests-grid">
+              <label class="check-item checked" data-val="hotel"><input type="checkbox" checked> 🏨 <span data-i18n="int_hotel">فندق</span></label>
+              <label class="check-item" data-val="restaurant"><input type="checkbox"> 🍽️ <span data-i18n="int_rest">مطعم</span></label>
+              <label class="check-item" data-val="history"><input type="checkbox"> 🏛️ <span data-i18n="int_hist">تاريخ وثقافة</span></label>
+              <label class="check-item" data-val="shopping"><input type="checkbox"> 🛍️ <span data-i18n="int_shop">تسوق وأسواق</span></label>
+              <label class="check-item" data-val="nature"><input type="checkbox"> 🌿 <span data-i18n="int_nat">طبيعة وجبال</span></label>
+              <label class="check-item" data-val="activities"><input type="checkbox"> 🏄 <span data-i18n="int_act">أنشطة ورياضة</span></label>
+              <label class="check-item" data-val="spa"><input type="checkbox"> 🛁 <span data-i18n="int_spa">حمام وسبا</span></label>
+              <label class="check-item" data-val="transport"><input type="checkbox"> 🚗 <span data-i18n="int_trans">نقل وتنقل</span></label>
+            </div>
+          </div>
+        </div>
+        <button class="submit-btn" onclick="generatePlan()">
+          <span class="btn-arrow">✈</span>
+          <span data-i18n="btn_plan">خطتي – ابدأ الرحلة!</span>
+          <span class="btn-arrow">🗺️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT PAGE -->
+<div id="page-result" class="page">
+  <div class="result-header">
+    <div class="result-info">
+      <h2 id="result-city-name">🕌 مراكش</h2>
+      <p id="result-subtitle">رحلتك المثالية</p>
+      <div class="result-tags" id="result-tags"></div>
+    </div>
+    <button class="back-btn" onclick="showPage('home')">← <span data-i18n="btn_back">تعديل الخطة</span></button>
+  </div>
+  <div class="ai-card">
+    <div class="ai-card-header">
+      <div class="ai-card-header-icon">🤖</div>
+      <div>
+        <span class="ai-card-header-title" data-i18n="ai_response">خطتك من Murshid AI</span>
+        <div class="ai-card-header-sub">تحليل مخصص بالذكاء الاصطناعي</div>
+      </div>
+    </div>
+    <div id="ai-output" class="ai-body">
+      <div class="loading-state">
+        <div class="loader-ring"></div>
+        <p class="loading-text" data-i18n="loading">جاري بناء خطتك المثالية...</p>
+        <div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="places-card" id="suggested-places-container" style="display:none;">
+    <div class="places-card-header">
+      <div class="places-header-icon">📍</div>
+      <div>
+        <div class="places-header-title">الأماكن المقترحة</div>
+        <div class="places-header-sub">انقر على مكان لعرض تفاصيل رحلتك المخصصة</div>
+      </div>
+    </div>
+    <div class="places-grid" id="suggested-places-grid"></div>
+  </div>
+  <div id="map-container">
+    <div class="map-header"><span>🗺️</span><span data-i18n="map_title">خريطة رحلتك التفاعلية</span></div>
+    <div id="trip-map"></div>
+  </div>
+  <div class="chat-section">
+    <div class="chat-header"><span>💬</span><span data-i18n="chat_title">تحدث مع مرشدك – عدّل خطتك</span></div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" class="chat-input" placeholder="اسأل عن أي شيء في خطتك..." onkeydown="if(event.key==='Enter') sendChat()">
+      <button class="chat-send-btn" onclick="sendChat()">⬆</button>
+    </div>
+  </div>
+  <div class="feedback-section">
+    <h3 data-i18n="fb_title">💌 شاركنا رأيك</h3>
+    <p data-i18n="fb_sub">رأيك يساعدنا على تحسين تجربة ملايين السياح</p>
+    <div class="stars-row">
+      <button class="star-btn" onclick="setRating(1)">⭐</button>
+      <button class="star-btn" onclick="setRating(2)">⭐</button>
+      <button class="star-btn" onclick="setRating(3)">⭐</button>
+      <button class="star-btn" onclick="setRating(4)">⭐</button>
+      <button class="star-btn" onclick="setRating(5)">⭐</button>
+    </div>
+    <p data-i18n="fb_rec">هل تنصح السياح الآخرين باستخدام Murshid AI؟</p>
+    <div class="recommend-row">
+      <button class="rec-btn yes" onclick="setRecommend(true)">👍 نعم بالتأكيد!</button>
+      <button class="rec-btn no" onclick="setRecommend(false)">👎 ليس الآن</button>
+    </div>
+    <textarea class="feedback-textarea" id="feedback-text" placeholder="أخبرنا عن تجربتك..."></textarea><br>
+    <button class="feedback-submit" onclick="submitFeedback()">إرسال التقييم</button>
+  </div>
+</div>
+
+<!-- PLACE DETAIL PAGE -->
+<div id="page-place-detail" class="page">
+  <div class="place-detail-header">
+    <div class="place-detail-title-wrap">
+      <div class="place-detail-big-icon" id="detail-icon">🏛️</div>
+      <div>
+        <div class="place-detail-name" id="detail-name">اسم المكان</div>
+        <div class="place-detail-subtitle" id="detail-city">رحلتك المخصصة</div>
+        <div class="place-detail-tags" id="detail-tags"></div>
+      </div>
+    </div>
+    <button class="back-btn-detail" onclick="showPage('result')">← العودة للخطة</button>
+  </div>
+  <div id="detail-loading" class="place-detail-card">
+    <div class="detail-loading">
+      <div class="loader-ring"></div>
+      <p class="loading-text">جاري تحميل تفاصيل المكان...</p>
+      <div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>
+    </div>
+  </div>
+  <div id="detail-content" style="display:none;">
+    <div class="place-info-grid">
+      <div>
+        <div class="place-detail-card">
+          <div class="place-detail-card-header"><span class="card-icon">📖</span><span class="card-title">وصف المكان وتفاصيله</span></div>
+          <div class="place-detail-card-body" id="detail-description"></div>
+        </div>
+        <div class="place-detail-card">
+          <div class="place-detail-card-header"><span class="card-icon">🗺️</span><span class="card-title">الموقع على الخريطة</span></div>
+          <div id="detail-map"></div>
+        </div>
+      </div>
+      <div>
+        <div class="place-detail-card">
+          <div class="place-detail-card-header"><span class="card-icon">ℹ️</span><span class="card-title">معلومات عملية</span></div>
+          <div class="place-detail-card-body"><ul class="info-list" id="detail-info-list"></ul></div>
+        </div>
+        <div class="place-detail-card">
+          <div class="place-detail-card-header"><span class="card-icon">💡</span><span class="card-title">نصائح المرشد</span></div>
+          <div class="place-detail-card-body" id="detail-tips"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 <span>Murshid AI</span> — <span data-i18n="footer_txt">مرشدك السياحي الذكي في المغرب</span> 🇲🇦</p>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const GROQ_API_KEY = 'gsk_FmUR9NVZ1FKESFuWHHNrzWGdyb3FYykvUxFd0ZY7LwO9BvFpwpXED';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const i18n = {
+  ar: { tagline:"مرشدك السياحي الذكي",hero_badge:"مدعوم بالذكاء الاصطناعي",hero_title1:"اكتشف المغرب",hero_title2:"بطريقة لا تُنسى",hero_desc:"خطط سفر مخصصة، إرشادات في الوقت الفعلي، وتجارب أصيلة",form_title:"ابنِ خطة رحلتك",form_sub:"أجب على الأسئلة وسيبني المرشد خطتك المثالية",lbl_city:"المدينة المغربية",lbl_country:"بلدك / جنسيتك",lbl_budget:"الميزانية",lbl_people:"عدد المسافرين",lbl_dates:"مدة الرحلة",lbl_interests:"ماذا تريد أن تحجز / تجرب؟",int_hotel:"فندق",int_rest:"مطعم",int_hist:"تاريخ وثقافة",int_shop:"تسوق وأسواق",int_nat:"طبيعة وجبال",int_act:"أنشطة ورياضة",int_spa:"حمام وسبا",int_trans:"نقل وتنقل",btn_plan:"خطتي – ابدأ الرحلة!",btn_back:"تعديل الخطة",ai_response:"خطتك من Murshid AI",loading:"جاري بناء خطتك المثالية...",map_title:"خريطة رحلتك التفاعلية",chat_title:"تحدث مع مرشدك – عدّل خطتك",chat_placeholder:"اسأل عن أي شيء في خطتك...",fb_title:"💌 شاركنا رأيك",fb_sub:"رأيك يساعدنا على تحسين تجربة ملايين السياح",fb_rec:"هل تنصح السياح الآخرين باستخدام Murshid AI؟",fb_yes:"👍 نعم بالتأكيد!",fb_no:"👎 ليس الآن",fb_placeholder:"أخبرنا عن تجربتك...",fb_send:"إرسال التقييم",footer_txt:"مرشدك السياحي الذكي في المغرب",toast_missing:"⚠️ يرجى ملء جميع الحقول الأساسية",toast_feedback:"شكراً على تقييمك! 🌟",opt_select:"— اختر —",p1:"1 (مسافر منفرد)",p2:"2 (زوجان)",p6:"6-10 (مجموعة)",p10:"+10 (مجموعة كبيرة)" },
+  fr: { tagline:"Votre guide touristique intelligent",hero_badge:"Propulsé par l'IA",hero_title1:"Découvrez le Maroc",hero_title2:"D'une façon inoubliable",hero_desc:"Plans personnalisés, conseils en temps réel",form_title:"Créez votre itinéraire",form_sub:"Répondez et Murshid construira votre plan",lbl_city:"Ville",lbl_country:"Pays",lbl_budget:"Budget",lbl_people:"Voyageurs",lbl_dates:"Durée",lbl_interests:"Que souhaitez-vous ?",int_hotel:"Hôtel",int_rest:"Restaurant",int_hist:"Histoire",int_shop:"Shopping",int_nat:"Nature",int_act:"Activités",int_spa:"Hammam",int_trans:"Transport",btn_plan:"Mon Plan!",btn_back:"Modifier",ai_response:"Votre plan par Murshid AI",loading:"Construction de votre plan...",map_title:"Carte interactive",chat_title:"Discutez avec votre guide",chat_placeholder:"Posez une question...",fb_title:"💌 Votre avis",fb_sub:"Vos retours améliorent l'expérience",fb_rec:"Recommanderiez-vous Murshid AI ?",fb_yes:"👍 Oui!",fb_no:"👎 Non",fb_placeholder:"Partagez...",fb_send:"Envoyer",footer_txt:"Guide touristique au Maroc",toast_missing:"⚠️ Remplissez tous les champs",toast_feedback:"Merci! 🌟",opt_select:"— Choisir —",p1:"1 (Solo)",p2:"2 (Couple)",p6:"6-10",p10:"+10" },
+  en: { tagline:"Your Smart Tourism Guide",hero_badge:"Powered by AI",hero_title1:"Discover Morocco",hero_title2:"In an unforgettable way",hero_desc:"Personalized plans, real-time guidance",form_title:"Build Your Trip Plan",form_sub:"Answer and Murshid will plan your trip",lbl_city:"City",lbl_country:"Country",lbl_budget:"Budget",lbl_people:"Travelers",lbl_dates:"Duration",lbl_interests:"What to book?",int_hotel:"Hotel",int_rest:"Restaurant",int_hist:"History",int_shop:"Shopping",int_nat:"Nature",int_act:"Activities",int_spa:"Hammam",int_trans:"Transport",btn_plan:"My Plan – Go!",btn_back:"Edit Plan",ai_response:"Your Plan from Murshid AI",loading:"Building your perfect plan...",map_title:"Interactive Trip Map",chat_title:"Chat with your Guide",chat_placeholder:"Ask anything...",fb_title:"💌 Share Feedback",fb_sub:"Your feedback improves the experience",fb_rec:"Would you recommend Murshid AI?",fb_yes:"👍 Yes!",fb_no:"👎 No",fb_placeholder:"Tell us...",fb_send:"Submit",footer_txt:"Smart Tourism Guide in Morocco",toast_missing:"⚠️ Please fill required fields",toast_feedback:"Thank you! 🌟",opt_select:"— Select —",p1:"1 (Solo)",p2:"2 (Couple)",p6:"6-10",p10:"+10" },
+  es: { tagline:"Tu guía turístico inteligente",hero_badge:"Impulsado por IA",hero_title1:"Descubre Marruecos",hero_title2:"De manera inolvidable",hero_desc:"Planes personalizados y experiencias auténticas",form_title:"Crea tu itinerario",form_sub:"Responde y Murshid construirá tu plan",lbl_city:"Ciudad",lbl_country:"País",lbl_budget:"Presupuesto",lbl_people:"Viajeros",lbl_dates:"Duración",lbl_interests:"¿Qué deseas?",int_hotel:"Hotel",int_rest:"Restaurante",int_hist:"Historia",int_shop:"Compras",int_nat:"Naturaleza",int_act:"Actividades",int_spa:"Hammam",int_trans:"Transporte",btn_plan:"¡Mi Plan!",btn_back:"Editar",ai_response:"Tu plan de Murshid AI",loading:"Construyendo tu plan...",map_title:"Mapa interactivo",chat_title:"Habla con tu guía",chat_placeholder:"Pregunta algo...",fb_title:"💌 Tu opinión",fb_sub:"Tus comentarios mejoran la experiencia",fb_rec:"¿Recomendarías Murshid AI?",fb_yes:"👍 ¡Sí!",fb_no:"👎 No",fb_placeholder:"Cuéntanos...",fb_send:"Enviar",footer_txt:"Guía turístico en Marruecos",toast_missing:"⚠️ Completa los campos",toast_feedback:"¡Gracias! 🌟",opt_select:"— Seleccionar —",p1:"1 (Solo)",p2:"2 (Pareja)",p6:"6-10",p10:"+10" }
+};
+
+let currentLang='ar', currentRating=0, currentRecommend=null, tripMap=null, detailMap=null;
+let conversationHistory=[], tripData={}, currentPlaceData=null;
+
+const cityCoords = { marrakech:[31.6295,-7.9811],fes:[34.0181,-5.0078],casablanca:[33.5731,-7.5898],chefchaouen:[35.1716,-5.2697],rabat:[34.0209,-6.8416],tanger:[35.7595,-5.8340],agadir:[30.4278,-9.5981],essaouira:[31.5085,-9.7595],merzouga:[31.0992,-4.0116],tetouan:[35.5889,-5.3626],ifrane:[33.5228,-5.1069],ouarzazate:[30.9189,-6.8936] };
+
+const cityAttractions = {
+  marrakech:[
+    {lat:31.6258,lng:-7.9891,name:"جامع الفنا",nameEn:"Jemaa el-Fna",icon:"🏛️",type:"ساحة تقليدية",hours:"طوال اليوم",price:"مجاني",tip:"تفوح منه روح مراكش الحقيقية عند الغروب"},
+    {lat:31.6417,lng:-8.0029,name:"حدائق ماجوريل",nameEn:"Majorelle Gardens",icon:"🌺",type:"حديقة",hours:"08:00-18:00",price:"70 درهم",tip:"الجزء الأزرق مذهل صباحاً"},
+    {lat:31.6316,lng:-7.9865,name:"المدرسة البن يوسف",nameEn:"Ben Youssef Madrasa",icon:"🕌",type:"تراث إسلامي",hours:"09:00-18:00",price:"70 درهم",tip:"التفاصيل المعمارية لا مثيل لها"},
+    {lat:31.6181,lng:-7.9868,name:"قصر الباهية",nameEn:"Bahia Palace",icon:"🏰",type:"قصر تاريخي",hours:"09:00-17:00",price:"70 درهم",tip:"حدائقه سرية وخلابة"},
+    {lat:31.6195,lng:-7.9895,name:"ضريح السعديين",nameEn:"Saadian Tombs",icon:"⚰️",type:"مقبرة تاريخية",hours:"09:00-17:00",price:"70 درهم",tip:"اكتُشفت بعد قرون من الإخفاء"}
+  ],
+  fes:[
+    {lat:34.0641,lng:-4.9726,name:"جامع القرويين",nameEn:"Al-Qarawiyyin",icon:"🕌",type:"مسجد تاريخي",hours:"للمسلمين فقط",price:"مجاني",tip:"أقدم جامعة في العالم"},
+    {lat:34.0650,lng:-4.9730,name:"مدرسة العطارين",nameEn:"Attarine Madrasa",icon:"🏛️",type:"تراث إسلامي",hours:"09:00-18:00",price:"20 درهم",tip:"زليج وخشب منقوش لا مثيل له"},
+    {lat:34.0636,lng:-4.9743,name:"دباغة شواره",nameEn:"Chouara Tannery",icon:"🎨",type:"حرفة تقليدية",hours:"08:00-18:00",price:"مجاني",tip:"انظر من الطوابق العليا"}
+  ],
+  chefchaouen:[
+    {lat:35.1716,lng:-5.2697,name:"المدينة الزرقاء",nameEn:"Blue Medina",icon:"💙",type:"مدينة عتيقة",hours:"طوال اليوم",price:"مجاني",tip:"الضوء ذهبي عند الفجر"},
+    {lat:35.1725,lng:-5.2706,name:"قلعة القصبة",nameEn:"Kasbah Museum",icon:"⛩️",type:"قلعة وحديقة",hours:"09:00-18:00",price:"10 درهم",tip:"إطلالة بانورامية على المدينة"},
+    {lat:35.1708,lng:-5.2692,name:"ساحة الحمام",nameEn:"Place Outa el Hammam",icon:"⛲",type:"ساحة مركزية",hours:"طوال اليوم",price:"مجاني",tip:"أفضل مقاهٍ حول الساحة"}
+  ],
+  casablanca:[
+    {lat:33.6057,lng:-7.6324,name:"مسجد الحسن الثاني",nameEn:"Hassan II Mosque",icon:"🕌",type:"مسجد",hours:"09:00-17:00",price:"120 درهم",tip:"أضواء الليل تجعله أسطورياً"},
+    {lat:33.5893,lng:-7.6114,name:"درب السلطان",nameEn:"Anfa District",icon:"🏙️",type:"حي راقٍ",hours:"طوال اليوم",price:"مجاني",tip:"تسوق وأكل بجودة عالية"},
+    {lat:33.5731,lng:-7.5898,name:"الكورنيش",nameEn:"Corniche",icon:"🌊",type:"واجهة بحرية",hours:"طوال اليوم",price:"مجاني",tip:"المشي مساءً خيار مثالي"}
+  ],
+  agadir:[
+    {lat:30.4278,lng:-9.5981,name:"شاطئ أكادير",nameEn:"Agadir Beach",icon:"🏖️",type:"شاطئ",hours:"طوال اليوم",price:"مجاني",tip:"من أجمل شواطئ المغرب"},
+    {lat:30.4356,lng:-9.5998,name:"قلعة أوفلا",nameEn:"Agadir Oufella",icon:"🏰",type:"قلعة تاريخية",hours:"09:00-18:00",price:"مجاني",tip:"إطلالة على المدينة والبحر"},
+    {lat:30.4200,lng:-9.6100,name:"سوق الساعة",nameEn:"Souk El Had",icon:"🛍️",type:"سوق تقليدي",hours:"09:00-21:00",price:"مجاني",tip:"فواكه وتوابل بأسعار محلية"}
+  ],
+  essaouira:[
+    {lat:31.5131,lng:-9.7720,name:"أسوار المدينة",nameEn:"City Ramparts",icon:"🏰",type:"أسوار تاريخية",hours:"طوال اليوم",price:"مجاني",tip:"المشي مع صوت الأمواج"},
+    {lat:31.5085,lng:-9.7595,name:"شاطئ الصويرة",nameEn:"Essaouira Beach",icon:"🌊",type:"شاطئ",hours:"طوال اليوم",price:"مجاني",tip:"ملاذ الرياح والتزلج"},
+    {lat:31.5100,lng:-9.7660,name:"الميناء القديم",nameEn:"Old Port",icon:"⛵",type:"ميناء تاريخي",hours:"طوال اليوم",price:"مجاني",tip:"سمك طازج من الصيادين"}
+  ],
+  merzouga:[
+    {lat:31.1011,lng:-4.0136,name:"كثبان عرق الشبي",nameEn:"Erg Chebbi Dunes",icon:"🐪",type:"صحراء",hours:"طوال اليوم",price:"متغير",tip:"ركوب الجمال عند الغروب"},
+    {lat:31.0992,lng:-4.0116,name:"مخيمات الصحراء",nameEn:"Desert Camps",icon:"⛺",type:"تجربة ليلية",hours:"طوال الليل",price:"300-600 درهم",tip:"سماء النجوم مذهلة"},
+    {lat:31.1032,lng:-4.0168,name:"قرية مرزوقة",nameEn:"Merzouga Village",icon:"🏘️",type:"قرية صحراوية",hours:"طوال اليوم",price:"مجاني",tip:"تفاعل مع السكان المحليين"}
+  ],
+  rabat:[
+    {lat:34.0209,lng:-6.8416,name:"قصبة الوداية",nameEn:"Kasbah of the Udayas",icon:"🏰",type:"قصبة تاريخية",hours:"09:00-18:00",price:"مجاني",tip:"أزقة زرقاء وبيضاء"},
+    {lat:34.0138,lng:-6.8326,name:"برج الصومعة",nameEn:"Hassan Tower",icon:"🕌",type:"صرح تاريخي",hours:"09:00-18:00",price:"مجاني",tip:"مقبرة ملكية بجانبه"},
+    {lat:34.0170,lng:-6.8269,name:"شالة",nameEn:"Chellah",icon:"🏛️",type:"أطلال رومانية",hours:"09:00-17:00",price:"70 درهم",tip:"أفضل وقت في الربيع"}
+  ],
+  tanger:[
+    {lat:35.7912,lng:-5.8086,name:"القصبة",nameEn:"Kasbah Museum",icon:"🏛️",type:"قصبة تاريخية",hours:"09:00-17:00",price:"20 درهم",tip:"إطلالة على مضيق جبل طارق"},
+    {lat:35.7776,lng:-5.8475,name:"كهف هرقل",nameEn:"Hercules Cave",icon:"🌊",type:"كهف طبيعي",hours:"09:00-18:00",price:"10 درهم",tip:"الفتحة تشبه خريطة أفريقيا"},
+    {lat:35.7917,lng:-5.8062,name:"المدينة القديمة",nameEn:"Old Medina",icon:"🏙️",type:"مدينة عتيقة",hours:"طوال اليوم",price:"مجاني",tip:"شاي مغربي في المقاهي التقليدية"}
+  ],
+  ifrane:[
+    {lat:33.5228,lng:-5.1069,name:"تمثال الأسد",nameEn:"Lion Statue",icon:"🦁",type:"معلم سياحي",hours:"طوال اليوم",price:"مجاني",tip:"مكان أنيق للصور"},
+    {lat:33.5200,lng:-5.1100,name:"منتزه الأطلس",nameEn:"Middle Atlas Park",icon:"🌲",type:"طبيعة وغابات",hours:"طوال اليوم",price:"مجاني",tip:"الثلج في الشتاء رائع"},
+    {lat:33.5250,lng:-5.0950,name:"بحيرة دايت عوا",nameEn:"Dayet Aoua Lake",icon:"🦢",type:"بحيرة طبيعية",hours:"طوال اليوم",price:"مجاني",tip:"مشاهدة الطيور المهاجرة"}
+  ],
+  ouarzazate:[
+    {lat:30.9189,lng:-6.8936,name:"استوديوهات CLA",nameEn:"CLA Studios",icon:"🎬",type:"استوديوهات سينمائية",hours:"09:00-18:00",price:"60 درهم",tip:"هنا صُوّرت Game of Thrones"},
+    {lat:31.0492,lng:-6.6800,name:"آيت بن حدو",nameEn:"Ait Benhaddou",icon:"🏰",type:"قصبة يونسكو",hours:"طوال اليوم",price:"مجاني",tip:"تسلق القمة للإطلالة الكاملة"},
+    {lat:30.9175,lng:-6.9028,name:"قصبة تيفولتوت",nameEn:"Taourirt Kasbah",icon:"🕌",type:"قصبة تاريخية",hours:"09:00-18:00",price:"20 درهم",tip:"أرقى قصبة في المنطقة"}
+  ],
+  tetouan:[
+    {lat:35.5738,lng:-5.3707,name:"الميدان الكبير",nameEn:"Grand Square",icon:"🏛️",type:"ساحة مركزية",hours:"طوال اليوم",price:"مجاني",tip:"الحياة الشعبية الأصيلة"},
+    {lat:35.5709,lng:-5.3721,name:"المدينة القديمة",nameEn:"Historic Medina",icon:"🕌",type:"مدينة عتيقة",hours:"طوال اليوم",price:"مجاني",tip:"أقل حشوداً من فاس"},
+    {lat:35.5889,lng:-5.3626,name:"متحف الآثار",nameEn:"Archaeological Museum",icon:"🖼️",type:"متحف",hours:"09:00-16:30",price:"10 درهم",tip:"موزاييك روماني رائع"}
+  ]
+};
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.trim().toLowerCase() === lang));
+  const isRTL = lang === 'ar';
+  document.documentElement.lang = lang;
+  document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+  document.body.classList.toggle('ltr', !isRTL);
+  const t = i18n[lang] || i18n.ar;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k]) el.textContent = t[k]; });
+  const ci = document.getElementById('chat-input'); if (ci) ci.placeholder = t.chat_placeholder || '';
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showToast(msg, dur=3000) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, dur);
+}
+
+document.querySelectorAll('.check-item').forEach(item => {
+  item.addEventListener('click', e => { e.preventDefault(); item.classList.toggle('checked'); item.querySelector('input').checked = item.classList.contains('checked'); });
+});
+
+function buildPrompt(data) {
+  const langMap = {ar:'Arabic',fr:'French',en:'English',es:'Spanish'};
+  const lang = langMap[data.lang] || 'Arabic';
+  const days = data.dateFrom && data.dateTo ? Math.ceil((new Date(data.dateTo)-new Date(data.dateFrom))/86400000)+' days' : 'flexible';
+  return `You are Murshid AI, an expert Moroccan tourism guide. Reply ENTIRELY in ${lang}.
+TOURIST: City=${data.city}, Country=${data.country}, Budget=${data.budget} ${data.currency}, Travelers=${data.people}, Period=${data.dateFrom||'flexible'} to ${data.dateTo||'flexible'} (${days}), Interests=${data.interests.join(', ')}.
+TASK: 1. Warm personalized greeting. 2. Tell the city's story magically. 3. Detailed day-by-day itinerary as narrative (not bullet lists). For each place: Arabic+local name, why it matches interests, authentic description, local secret/tip, best time, price in MAD, opening hours. 4. Cultural tips: dress, etiquette, phrases. 5. Budget breakdown. 6. Warm closing. 7. End with: "⚠️ Murshid AI provides recommendations based on available data. Please verify opening hours and prices before visiting."
+Write beautifully with soul. Make them FEEL the magic of Morocco.`;
+}
+
+async function generatePlan() {
+  const city = document.getElementById('city').value;
+  const country = document.getElementById('country').value;
+  const budget = document.getElementById('budget').value;
+  const currency = document.getElementById('currency').value;
+  const people = document.getElementById('people').value;
+  const dateFrom = document.getElementById('date-from').value;
+  const dateTo = document.getElementById('date-to').value;
+  if (!city || !country || !budget) { showToast((i18n[currentLang]||i18n.ar).toast_missing); return; }
+  const interests = []; document.querySelectorAll('.check-item.checked').forEach(i => interests.push(i.getAttribute('data-val')));
+  const co = document.getElementById('country'); const so = co.options[co.selectedIndex];
+  const suggestedLang = so.getAttribute('data-lang') || currentLang;
+  tripData = {city,country,budget,currency,people,dateFrom,dateTo,interests,lang:suggestedLang};
+  const cityNames = {marrakech:'مراكش – Marrakech',fes:'فاس – Fès',casablanca:'الدار البيضاء – Casablanca',chefchaouen:'شفشاون – Chefchaouen',rabat:'الرباط – Rabat',tanger:'طنجة – Tanger',agadir:'أكادير – Agadir',essaouira:'الصويرة – Essaouira',merzouga:'مرزوقة – Merzouga',tetouan:'تطوان – Tétouan',ifrane:'إفران – Ifrane',ouarzazate:'ورزازات – Ouarzazate'};
+  document.getElementById('result-city-name').textContent = '🕌 ' + (cityNames[city]||city);
+  document.getElementById('result-subtitle').textContent = 'رحلتك المثالية المخصصة';
+  document.getElementById('result-tags').innerHTML = `<span class="result-tag">💰 ${budget} ${currency}</span><span class="result-tag">👥 ${people} مسافر</span>${dateFrom?`<span class="result-tag">📅 ${dateFrom} ← ${dateTo}</span>`:''}${interests.slice(0,3).map(i=>`<span class="result-tag">✓ ${i}</span>`).join('')}`;
+  document.getElementById('suggested-places-container').style.display = 'none';
+  showPage('result');
+  document.getElementById('ai-output').innerHTML = `<div class="loading-state"><div class="loader-ring"></div><p class="loading-text">${(i18n[currentLang]||i18n.ar).loading}</p><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>`;
+  conversationHistory = []; document.getElementById('chat-messages').innerHTML = '';
+  initTripMap(city);
+  conversationHistory.push({role:'user',content:buildPrompt(tripData)});
+  try {
+    const response = await callGroq(conversationHistory);
+    const text = extractText(response);
+    document.getElementById('ai-output').innerHTML = formatAITextPremium(text);
+    conversationHistory.push({role:'assistant',content:text});
+    renderSuggestedPlaces(city);
+    addChatMessage('ai', text.substring(0,200)+'...');
+  } catch(err) {
+    document.getElementById('ai-output').innerHTML = `<div style="padding:40px;text-align:center;color:#c0392b;"><p style="font-size:20px;">⚠️ حدث خطأ</p><p style="color:#666;margin-top:10px;">${err.message}</p><button onclick="generatePlan()" style="margin-top:20px;padding:12px 28px;background:var(--green);color:white;border:none;border-radius:12px;cursor:pointer;">🔄 حاول مرة أخرى</button></div>`;
+  }
+}
+
+function applyInlineFormat(t) {
+  return t.replace(/\*\*\*(.*?)\*\*\*/g,'<strong><em style="color:var(--terracotta)">$1</em></strong>').replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--green)">$1</strong>').replace(/\*(.*?)\*/g,'<em style="color:var(--terracotta)">$1</em>');
+}
+
+function formatAITextPremium(text) {
+  if (!text) return '<div class="ai-body-inner"><p>لم يتم استلام رد.</p></div>';
+  let safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const lines = safe.split('\n');
+  const gEnd = lines.findIndex((l,i) => i>2 && (l.match(/^\*\*(اليوم|Day|Jour|Día)/i)||l.match(/^#{1,3}\s*(اليوم|Day|Jour|Día)/i)||(i>4&&l.trim()&&lines.slice(0,i).filter(x=>x.trim()).length>=3)));
+  const gLines = gEnd>0?lines.slice(0,gEnd):lines.slice(0,5);
+  const bLines = gEnd>0?lines.slice(gEnd):lines.slice(5);
+  const gHtml = gLines.map(l=>l.trim()?`<p>${applyInlineFormat(l)}</p>`:'').filter(Boolean).join(' ');
+  let html = `<div class="ai-greeting"><p style="font-family:'Amiri',serif;font-size:18px;line-height:2.1;">${gHtml.replace(/<\/?p>/g,' ')}</p></div><div class="ai-body-inner">`;
+  let dayCount=0, isDayOpen=false, isListOpen=false;
+  for (let i=0;i<bLines.length;i++) {
+    let line=bLines[i].trim(); if(!line){if(isListOpen){html+='</ul>';isListOpen=false;}continue;}
+    const dayM=line.match(/\*\*(اليوم|Day|Jour|Día)\s*(\d+|الأول|الثاني|الثالث|الرابع|الخامس|One|Two|Three|Un|Deux|Uno|Dos)[:\s–-]*(.*?)\*\*/i)||line.match(/^#{1,3}\s*(اليوم|Day|Jour|Día)\s*(\d+|الأول|الثاني|الثالث|الرابع|الخامس|One|Two|Three)[:\s–-]*(.*)/i);
+    if(dayM){if(isListOpen){html+='</ul>';isListOpen=false;}if(isDayOpen){html+='</div></div>';}dayCount++;html+=`<div class="ai-day-card"><div class="ai-day-header"><div class="ai-day-number">${dayCount}</div><div class="ai-day-title">${dayM[1]} ${dayM[2]}${dayM[3]?': '+dayM[3].replace(/\*/g,''):''}</div></div><div class="ai-day-body">`;isDayOpen=true;continue;}
+    const h2M=line.match(/^#{2,3}\s+(.+)/)||line.match(/^\*\*(.{3,60})\*\*\s*$/);
+    if(h2M&&!dayM){if(isListOpen){html+='</ul>';isListOpen=false;}const title=h2M[1];if(title.match(/ميزانية|Budget|budget/)){html+=`<div class="ai-budget-section"><div class="ai-budget-title">💰 ${applyInlineFormat(title)}</div>`;let bl=[];while(i+1<bLines.length&&bLines[i+1].trim()){i++;bl.push(bLines[i].trim());}html+=`<div style="line-height:2;opacity:0.9;">${bl.map(l=>`<p>${applyInlineFormat(l)}</p>`).join('')}</div></div>`;}else if(title.match(/نصيحة|Tips|Conseils|Consejos|ثقاف|آداب/)){html+=`<div class="ai-tips-section"><div class="ai-tips-title">🌿 ${applyInlineFormat(title)}</div>`;}else{html+=`<h3 style="font-family:'Amiri',serif;color:var(--green);font-size:20px;margin:22px 0 10px;border-right:4px solid var(--gold);padding-right:12px;">${applyInlineFormat(title)}</h3>`;}continue;}
+    if(line.match(/^[-•*]\s+/)||line.match(/^\d+\.\s+/)){if(!isListOpen){html+='<ul class="ai-tips-list">';isListOpen=true;}html+=`<li>${applyInlineFormat(line.replace(/^[-•*\d.]+\s+/,''))}</li>`;continue;}
+    if(line.includes('⚠️')&&line.includes('Murshid')){if(isListOpen){html+='</ul>';isListOpen=false;}if(isDayOpen){html+='</div></div>';isDayOpen=false;}html+=`</div><div class="ai-disclaimer">${applyInlineFormat(line)}</div>`;continue;}
+    if(isListOpen){html+='</ul>';isListOpen=false;}
+    html+=`<p style="margin-bottom:12px;line-height:2;">${applyInlineFormat(line)}</p>`;
+  }
+  if(isListOpen)html+='</ul>';if(isDayOpen)html+='</div></div>';html+='</div>';
+  return html;
+}
+
+function renderSuggestedPlaces(city) {
+  const attrs = cityAttractions[city]; if(!attrs||!attrs.length) return;
+  const grid = document.getElementById('suggested-places-grid'); grid.innerHTML='';
+  attrs.forEach(place => {
+    const card = document.createElement('div'); card.className='place-card';
+    card.innerHTML=`<div class="place-card-icon-wrap">${place.icon}</div><div class="place-card-text"><div class="place-card-name">${place.name}</div><div class="place-card-type">${place.type}</div></div><div class="place-card-arrow">←</div>`;
+    card.addEventListener('click',()=>openPlaceDetail(place,city)); grid.appendChild(card);
+  });
+  document.getElementById('suggested-places-container').style.display='block';
+}
+
+async function openPlaceDetail(place, city) {
+  currentPlaceData=place;
+  document.getElementById('detail-icon').textContent=place.icon;
+  document.getElementById('detail-name').textContent=place.name;
+  document.getElementById('detail-city').textContent=place.nameEn+' — '+(city.charAt(0).toUpperCase()+city.slice(1));
+  document.getElementById('detail-tags').innerHTML=`<span class="place-detail-tag">${place.type}</span><span class="place-detail-tag">⏰ ${place.hours}</span><span class="place-detail-tag">💰 ${place.price}</span>`;
+  document.getElementById('detail-loading').style.display='block';
+  document.getElementById('detail-content').style.display='none';
+  showPage('place-detail');
+  setTimeout(()=>{
+    if(detailMap){detailMap.remove();detailMap=null;}
+    detailMap=L.map('detail-map').setView([place.lat,place.lng],15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(detailMap);
+    const icon=L.divIcon({className:'',html:`<div style="background:#1B4D3E;border:3px solid #C9A84C;border-radius:50%;color:white;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,0.3);">${place.icon}</div>`,iconSize:[44,44],iconAnchor:[22,22]});
+    L.marker([place.lat,place.lng],{icon}).addTo(detailMap).bindPopup(`<strong style="color:#1B4D3E;">${place.name}</strong>`).openPopup();
+  },100);
+  try {
+    const langMap={ar:'Arabic',fr:'French',en:'English',es:'Spanish'};
+    const lang=langMap[tripData.lang||'ar']||'Arabic';
+    const prompt=`You are Murshid AI. Reply ENTIRELY in ${lang}. Tourist is visiting: ${place.name} (${place.nameEn}) in ${tripData.city||'Morocco'}. Budget: ${tripData.budget||'?'} ${tripData.currency||'MAD'}, interests: ${(tripData.interests||[]).join(', ')}.
+Provide: 1. Rich atmospheric DESCRIPTION (3-4 sentences). 2. Local secret tip (start with "💡 نصيحة:"). 3. Best time to visit (start with "🕐 أفضل وقت:"). 4. Nearby places (start with "📍 بالقرب منه:"). Keep it beautiful and practical.`;
+    const response=await callGroq([{role:'user',content:prompt}]);
+    const text=extractText(response);
+    const safe=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const lines=safe.split('\n').filter(l=>l.trim());
+    let desc='',tips='',extras='';
+    lines.forEach(line=>{
+      const l=applyInlineFormat(line.trim());
+      if(line.includes('💡')||line.match(/نصيحة|Conseil|Tip/)){tips+=`<p>${l}</p>`;}
+      else if(line.includes('🕐')||line.match(/أفضل وقت|Best time/)){extras+=`<li><span class="info-label">🕐 أفضل وقت</span><span class="info-val">${l.replace(/🕐|أفضل وقت[:\s]*/g,'').trim()}</span></li>`;}
+      else if(line.includes('📍')||line.match(/بالقرب|Nearby/)){extras+=`<li><span class="info-label">📍 بالقرب</span><span class="info-val">${l.replace(/📍|بالقرب منه[:\s]*/g,'').trim()}</span></li>`;}
+      else if(!desc||desc.split('</p>').length<=4){desc+=`<p style="margin-bottom:14px;line-height:2;">${l}</p>`;}
+    });
+    document.getElementById('detail-description').innerHTML=desc||`<p>${safe}</p>`;
+    document.getElementById('detail-info-list').innerHTML=`<li><span class="info-label">⏰ أوقات العمل</span><span class="info-val">${place.hours}</span></li><li><span class="info-label">💰 السعر</span><span class="info-val">${place.price}</span></li><li><span class="info-label">🌍 النوع</span><span class="info-val">${place.type}</span></li>${extras}`;
+    document.getElementById('detail-tips').innerHTML=tips||'<p style="color:var(--text-mid);">اسأل السكان المحليين للحصول على أفضل التجارب.</p>';
+    document.getElementById('detail-loading').style.display='none';
+    document.getElementById('detail-content').style.display='block';
+  } catch(err) {
+    document.getElementById('detail-loading').innerHTML=`<div style="padding:40px;text-align:center;"><p style="color:var(--terracotta);">⚠️ ${err.message}</p><button onclick="openPlaceDetail(currentPlaceData,'${city}')" style="margin-top:16px;padding:10px 24px;background:var(--green);color:white;border:none;border-radius:12px;cursor:pointer;">🔄 إعادة</button></div>`;
+  }
+}
+
+async function callGroq(messages) {
+  const res=await fetch(GROQ_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_API_KEY}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages,temperature:0.8,max_tokens:3000})});
+  if(!res.ok){const err=await res.json();throw new Error(err.error?.message||'API Error '+res.status);}
+  return res.json();
+}
+function extractText(data){try{return data.choices[0].message.content||'';}catch(e){return '';}}
+
+function addChatMessage(role,text){
+  const msgs=document.getElementById('chat-messages');
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  div.innerHTML=`<div class="msg-avatar">${role==='ai'?'🕌':'👤'}</div><div class="msg-bubble">${role==='ai'?text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'):text}</div>`;
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function sendChat(){
+  const input=document.getElementById('chat-input');const msg=input.value.trim();if(!msg)return;
+  input.value='';addChatMessage('user',msg);
+  const langMap={ar:'Arabic',fr:'French',en:'English',es:'Spanish'};
+  conversationHistory.push({role:'user',content:`(Continue in ${langMap[tripData.lang]||'Arabic'}) ${msg}`});
+  const loadDiv=document.createElement('div');loadDiv.className='msg ai';
+  loadDiv.innerHTML='<div class="msg-avatar">🕌</div><div class="msg-bubble"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
+  document.getElementById('chat-messages').appendChild(loadDiv);document.getElementById('chat-messages').scrollTop=99999;
+  try{const r=await callGroq(conversationHistory);const t=extractText(r);loadDiv.remove();addChatMessage('ai',t);conversationHistory.push({role:'assistant',content:t});}
+  catch(err){loadDiv.remove();addChatMessage('ai','⚠️ '+err.message);}
+}
+
+function initTripMap(city){
+  if(tripMap){tripMap.remove();tripMap=null;}
+  const coords=cityCoords[city]||[31.6295,-7.9811];
+  tripMap=L.map('trip-map').setView(coords,13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(tripMap);
+  const attrs=cityAttractions[city]||[],lls=[];
+  attrs.forEach((a,i)=>{
+    lls.push([a.lat,a.lng]);
+    const icon=L.divIcon({className:'',html:`<div style="background:#1B4D3E;border:3px solid #C9A84C;border-radius:50%;color:white;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;box-shadow:0 3px 8px rgba(0,0,0,0.4);">${i+1}</div>`,iconSize:[36,36],iconAnchor:[18,18]});
+    L.marker([a.lat,a.lng],{icon}).addTo(tripMap).bindPopup(`<strong style="color:#1B4D3E;">${a.icon} ${a.name}</strong><br><small>محطة ${i+1}</small>`);
+  });
+  if(lls.length>1)L.polyline(lls,{color:'#C9A84C',weight:3,dashArray:'8,8',opacity:0.8}).addTo(tripMap);
+}
+
+function setRating(n){currentRating=n;document.querySelectorAll('.star-btn').forEach((b,i)=>{b.classList.toggle('lit',i<n);b.textContent=i<n?'🌟':'⭐';});}
+function setRecommend(val){currentRecommend=val;document.querySelectorAll('.rec-btn').forEach(b=>b.classList.remove('selected'));document.querySelector(`.rec-btn.${val?'yes':'no'}`).classList.add('selected');}
+function submitFeedback(){showToast((i18n[currentLang]||i18n.ar).toast_feedback||'شكراً! 🌟');}
+
+setLang('ar');
+const today=new Date(),nw=new Date(today),nw2=new Date(today);
+nw.setDate(today.getDate()+7);nw2.setDate(today.getDate()+10);
+document.getElementById('date-from').value=nw.toISOString().split('T')[0];
+document.getElementById('date-to').value=nw2.toISOString().split('T')[0];
+</script>
+</body>
+</html>
